@@ -1,0 +1,15 @@
+{
+  "name": "photobooth",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/webapp",
+    "build": "npm run build -w apps/webapp",
+    "start": "npm run start -w apps/webapp",
+    "migrate": "npm run prisma:migrate -w apps/webapp",
+    "seed": "npm run prisma:seed -w apps/webapp",
+    "print-server": "npm run dev -w apps/print-server"
+  }
+}
