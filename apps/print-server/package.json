@@ -1,0 +1,17 @@
+{
+  "name": "photobooth-print-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pino": "^9.3.2",
+    "pdf-to-printer": "5.4.2",
+    "pdfkit": "^0.15.0",
+    "zod": "^3.23.8"
+  }
+}
