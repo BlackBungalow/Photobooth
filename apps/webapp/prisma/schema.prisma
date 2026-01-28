@@ -46,6 +46,22 @@ model Photo {
   printStatus PrintStatus  @default(QUEUED)
   createdAt   DateTime     @default(now())
   project     Project      @relation(fields: [projectId], references: [id])
+  printJobs   PrintJob[]
+}
+
+model PrintJob {
+  id           String        @id @default(uuid())
+  projectId    String
+  photoId      String
+  status       PrintJobStatus @default(QUEUED)
+  errorMessage String?
+  attempts     Int           @default(0)
+  lockedAt     DateTime?
+  lockedBy     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  project      Project       @relation(fields: [projectId], references: [id])
+  photo        Photo         @relation(fields: [photoId], references: [id])
 }
 
 enum ScreenMode {
@@ -54,6 +70,13 @@ enum ScreenMode {
 }
 
 enum PrintStatus {
+  QUEUED
+  PRINTING
+  DONE
+  ERROR
+}
+
+enum PrintJobStatus {
   QUEUED
   PRINTING
   DONE

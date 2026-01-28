@@ -1,0 +1,7 @@
+[build]
+  base = "apps/webapp"
+  command = "npm install && npm run build"
+  publish = "apps/webapp/.next"
+
+[build.environment]
+  NODE_VERSION = "22"
