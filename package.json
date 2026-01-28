@@ -11,5 +11,6 @@
     "migrate": "npm run prisma:migrate -w apps/webapp",
     "seed": "npm run prisma:seed -w apps/webapp",
     "print-agent": "npm run dev -w apps/print-agent"
+    "print-server": "npm run dev -w apps/print-server"
   }
 }

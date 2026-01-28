@@ -228,6 +228,26 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
     }
     setPrintError(false);
     await startPrintJob(photoId);
+    setPrintStatus('Impression en cours...');
+
+    const printResponse = await fetch('/api/print', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoId: data.photo.id })
+    });
+
+    if (!printResponse.ok) {
+      setPrintStatus('Erreur impression ❌');
+      return;
+    }
+
+    setPrintStatus('Imprimé ✅');
+    setTimeout(() => {
+      setStep('preview');
+      setSnapshot(null);
+      setIsPublic(true);
+      setPrintStatus(null);
+    }, 4000);
   };
 
   if (!project) {
@@ -294,6 +314,7 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
               </button>
             )}
           </div>
+          <div className="rounded-xl bg-gray-900 px-6 py-4 text-lg font-semibold">{printStatus}</div>
         )}
       </div>
     </main>
