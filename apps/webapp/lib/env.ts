@@ -11,6 +11,7 @@ const envSchema = z.object({
   S3_BUCKET: z.string().min(1),
   S3_PUBLIC_BASE_URL: z.string().optional(),
   SIGNED_URLS_ENABLED: z.string().optional(),
+  PRINT_AGENT_KEY: z.string().optional(),
   PRINT_SERVER_URL: z.string().optional(),
   PRINT_SERVER_API_KEY: z.string().optional(),
   WEBSOCKET_PUBLIC_URL: z.string().optional()

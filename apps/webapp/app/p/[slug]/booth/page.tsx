@@ -32,6 +32,8 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const [printStatus, setPrintStatus] = useState<string | null>(null);
+  const [photoId, setPhotoId] = useState<string | null>(null);
+  const [printError, setPrintError] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -104,6 +106,7 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
     }
     setStep('printing');
     setPrintStatus('Upload en cours...');
+    setPrintError(false);
 
     const baseImage = new Image();
     baseImage.src = snapshot;
@@ -164,6 +167,67 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
     }
 
     const data = await response.json();
+    setPhotoId(data.photo.id);
+    await startPrintJob(data.photo.id);
+  };
+
+  const startPrintJob = async (currentPhotoId: string) => {
+    if (!project) {
+      return;
+    }
+    setPrintStatus('Impression en cours...');
+    const response = await fetch('/api/print-jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectSlug: project.slug, photoId: currentPhotoId })
+    });
+
+    if (!response.ok) {
+      setPrintStatus('Erreur impression ❌');
+      setPrintError(true);
+      return;
+    }
+
+    const job = await response.json();
+    await pollPrintJob(job.jobId);
+  };
+
+  const pollPrintJob = async (jobId: string) => {
+    const maxAttempts = 30;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const response = await fetch(`/api/print-jobs/${jobId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'DONE') {
+          setPrintStatus('Imprimé ✅');
+          setTimeout(() => {
+            setStep('preview');
+            setSnapshot(null);
+            setIsPublic(true);
+            setPrintStatus(null);
+            setPhotoId(null);
+            setPrintError(false);
+          }, 4000);
+          return;
+        }
+        if (data.status === 'ERROR') {
+          setPrintStatus('Erreur impression ❌');
+          setPrintError(true);
+          return;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+    setPrintStatus('Impression en attente...');
+    setPrintError(true);
+  };
+
+  const retryPrint = async () => {
+    if (!photoId) {
+      return;
+    }
+    setPrintError(false);
+    await startPrintJob(photoId);
     setPrintStatus('Impression en cours...');
 
     const printResponse = await fetch('/api/print', {
@@ -242,6 +306,14 @@ export default function BoothPage({ params }: { params: { slug: string } }) {
         )}
 
         {step === 'printing' && (
+          <div className="rounded-xl bg-gray-900 px-6 py-4 text-lg font-semibold">
+            <p>{printStatus}</p>
+            {printError && (
+              <button onClick={retryPrint} className="mt-3 rounded bg-brand-500 px-4 py-2 text-base font-semibold">
+                Réessayer
+              </button>
+            )}
+          </div>
           <div className="rounded-xl bg-gray-900 px-6 py-4 text-lg font-semibold">{printStatus}</div>
         )}
       </div>
