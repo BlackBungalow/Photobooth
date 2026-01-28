@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id               String       @id @default(cuid())
+  name             String
+  slug             String       @unique
+  logoUrl          String?
+  messageBottom    String?
+  printEnabled     Boolean      @default(true)
+  screenMode       ScreenMode   @default(GRID)
+  screenSpeed      Int          @default(5)
+  jpegQuality      Float        @default(0.92)
+  cameraFacingMode String       @default("user")
+  isS3Public       Boolean      @default(false)
+  backgrounds      Background[]
+  photos           Photo[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Background {
+  id         String   @id @default(cuid())
+  projectId  String
+  name       String
+  s3Key      String
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id])
+}
+
+model Photo {
+  id          String       @id @default(cuid())
+  projectId   String
+  s3Key       String
+  publicUrl   String?
+  isPublic    Boolean      @default(true)
+  backgroundId String?
+  printStatus PrintStatus  @default(QUEUED)
+  createdAt   DateTime     @default(now())
+  project     Project      @relation(fields: [projectId], references: [id])
+}
+
+enum ScreenMode {
+  GRID
+  SLIDESHOW
+}
+
+enum PrintStatus {
+  QUEUED
+  PRINTING
+  DONE
+  ERROR
+}
